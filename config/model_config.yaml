@@ -1,0 +1,32 @@
+# Configuration des modèles de détection d'anomalies
+
+# Configuration pour le détecteur HDFS
+hdfs:
+  # Paramètres du modèle Isolation Forest
+  contamination: 0.01          # Proportion d'anomalies attendues (1%)
+  n_estimators: 200            # Nombre d'arbres dans la forêt
+  max_samples: "auto"          # Échantillons par arbre
+  random_state: 42             # Graine pour la reproductibilité
+
+  # Paramètres de préprocessing
+  max_training_samples: 50000  # Limite d'échantillons pour l'entraînement
+  pca_threshold: 100           # Seuil pour appliquer la PCA
+  pca_components: 100          # Nombre de composantes PCA
+
+  # Paramètres de normalisation
+  scaler_type: "standard"      # Type de normalisation (standard, minmax, robust)
+
+  # Paramètres d'analyse
+  top_anomalies_count: 5       # Nombre d'anomalies à détailler
+  top_features_count: 3        # Nombre de features principales à afficher
+
+# Configuration pour de futurs détecteurs
+text_logs:
+  # Paramètres pour les logs textuels (à implémenter)
+  max_sequence_length: 512
+  embedding_dim: 128
+
+system_metrics:
+  # Paramètres pour les métriques système (à implémenter)
+  window_size: 60
+  aggregation_method: "mean"

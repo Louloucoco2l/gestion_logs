@@ -13,12 +13,11 @@ with open("requirements.txt", "r", encoding="utf-8") as fh:
 setup(
     name="gestionlogs-anomaly-detector",
     version="2.0.0",
-    author="Votre Nom",
-    author_email="votre.email@example.com",
+    author="Louis COLLAS Erwan NICOLAS Nathan Brunet",
     description="Système de détection d'anomalies dans les logs HDFS",
     long_description=long_description,
     long_description_content_type="text/markdown",
-    url="https://github.com/votre-username/gestionlogs",
+    url="https://github.com/Louloucoco2l/gestion_logs",
     packages=find_packages(where="src"),
     package_dir={"": "src"},
     classifiers=[

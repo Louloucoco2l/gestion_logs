@@ -60,6 +60,12 @@ Exemples d'utilisation:
         default=0.01,
         help="Proportion d'anomalies attendues (défaut: 0.01)"
     )
+    parser.add_argument(
+        "action",
+        nargs="?",
+        choices=["create", "detect", "list", "visualize"],  # Ajouter "visualize"
+        help="Action à effectuer"
+    )
 
     args = parser.parse_args()
 
@@ -99,6 +105,10 @@ Exemples d'utilisation:
         elif args.action == "list":
             detector.list_available_files()
             return 0
+
+        elif args.action == "visualize":
+            from scripts.visualize_anomalies import main as visualize_main
+            return visualize_main()
 
         else:
             # Mode interactif si aucune action spécifiée

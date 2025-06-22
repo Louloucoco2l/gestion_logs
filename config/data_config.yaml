@@ -1,0 +1,26 @@
+# Configuration pour la gestion des données
+
+# Chemins des données
+paths:
+  raw_data: "data/raw"           # Données brutes
+  processed_data: "data/processed" # Données préprocessées
+  results: "data/results"        # Résultats d'analyse
+  models: "models"               # Modèles sauvegardés
+
+# Configuration des fichiers CSV
+csv:
+  encodings: ["utf-8", "latin-1", "cp1252"]  # Encodages à essayer
+  separator: ","                              # Séparateur CSV
+  decimal: "."                               # Séparateur décimal
+
+# Validation des données
+validation:
+  min_rows: 10                   # Nombre minimum de lignes
+  min_columns: 5                 # Nombre minimum de colonnes
+  max_file_size_mb: 1000        # Taille maximum en MB
+
+# Préprocessing
+preprocessing:
+  fill_na_value: 0              # Valeur pour remplacer les NaN
+  remove_duplicates: true       # Supprimer les doublons
+  normalize_column_names: true  # Normaliser les noms de colonnes

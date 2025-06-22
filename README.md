@@ -2,38 +2,55 @@
 
 ## Description
 
-Ce projet implémente un système intelligent de détection d'anomalies spécialement conçu pour analyser les logs HDFS (Hadoop Distributed File System) sous format vectorisé. Le système utilise des techniques d'apprentissage automatique pour identifier automatiquement les comportements anormaux dans les séquences d'événements.
+Ce projet implémente un système intelligent de détection d'anomalies spécialement conçu pour analyser les logs HDFS (Hadoop Distributed File System). Le système utilise des techniques d'apprentissage automatique, notamment l'algorithme Isolation Forest, pour identifier automatiquement les comportements anormaux dans les séquences d'événements sans nécessiter d'exemples d'anomalies préalablement étiquetés.
 
 ## Fonctionnalités Principales
 
 - **Détection d'anomalies HDFS** : Analyse spécialisée pour les logs HDFS vectorisés
-- **Apprentissage automatique** : Utilise l'algorithme Isolation Forest pour la détection
+- **Apprentissage non-supervisé** : Utilise l'algorithme Isolation Forest pour la détection
 - **Interface multiple** : Ligne de commande, interface interactive, et scripts dédiés
 - **Préprocessing automatique** : Normalisation et réduction de dimensionnalité
 - **Rapports détaillés** : Analyse des anomalies avec identification des événements critiques
+- **Visualisations avancées** : Heatmaps, histogrammes et graphiques de distribution
 - **Architecture modulaire** : Code organisé et extensible
 
 ## Structure du Projet
 
 ```
-gestionlogs/
-├── src/                          # Code source principal
-│   ├── models/                   # Modèles de détection
-│   │   ├── base_detector.py      # Classe de base abstraite
-│   │   └── hdfs_detector.py      # Détecteur HDFS spécialisé
-│   └── utils/                    # Utilitaires
-│       ├── file_utils.py         # Gestion des fichiers
-│       └── logger.py             # Système de logging
-├── scripts/                      # Scripts d'exécution
-│   ├── train_model.py            # Entraînement de modèles
-│   ├── detect_anomalies.py       # Détection d'anomalies
-│   └── interactive_cli.py        # Interface interactive
+gestion_logs/
+├── config/                       # Fichiers de configuration
+│   ├── data_config.yaml         # Configuration des données
+│   ├── logging_config.yaml      # Configuration du système de logs
+│   └── model_config.yaml        # Configuration des modèles
 ├── data/                         # Données du projet
-│   ├── raw/                      # Données brutes
-│   └── results/                  # Résultats d'analyse
+│   ├── raw/                     # Données brutes
+│   │   ├── normal_trace.csv     # Logs normaux
+│   │   └── failure_trace.csv    # Logs avec anomalies
+│   ├── results/                 # Résultats d'analyse
+│   │   ├── anomalies_normal_trace.csv
+│   │   └── anomalies_failure_trace.csv
+│   └── visualizations/          # Visualisations générées
+│       └── category_severity_heatmap.png
+├── logs/                         # Fichiers de log du système
 ├── models/                       # Modèles sauvegardés
-├── logs/                         # Fichiers de log
-└── main.py                       # Point d'entrée principal
+├── scripts/                      # Scripts d'exécution
+│   ├── detect_anomalies.py      # Détection d'anomalies
+│   ├── interactive_cli.py       # Interface interactive
+│   ├── train_model.py           # Entraînement de modèles
+│   └── visualize_anomalies.py   # Génération de visualisations
+├── src/                          # Code source principal
+│   ├── models/                  # Modèles de détection
+│   │   ├── base_detector.py     # Classe de base abstraite
+│   │   └── hdfs_detector.py     # Détecteur HDFS spécialisé
+│   └── utils/                   # Utilitaires
+│       ├── file_utils.py        # Gestion des fichiers
+│       └── logger.py            # Système de logging
+├── tests/                        # Tests unitaires et d'intégration
+├── explication_technique.md      # Documentation technique détaillée
+├── guide_utilisateur.md          # Guide utilisateur
+├── main.py                       # Point d'entrée principal
+├── README.md                     # Documentation générale
+└── setup.py                      # Configuration d'installation
 ```
 
 ## Installation
@@ -48,6 +65,14 @@ gestionlogs/
 ```bash
 pip install -r requirements.txt
 ```
+
+Les dépendances principales incluent :
+- pandas
+- numpy
+- scikit-learn
+- matplotlib
+- seaborn
+- pyyaml
 
 ### Installation du package (optionnel)
 
@@ -104,6 +129,12 @@ python scripts/train_model.py --data normal_trace.csv --contamination 0.02
 python scripts/detect_anomalies.py --data failure_trace.csv --model-type hdfs
 ```
 
+#### Génération de visualisations
+
+```bash
+python scripts/visualize_anomalies.py --input data/results/anomalies_failure_trace.csv
+```
+
 ## Format des Données
 
 Le système est optimisé pour les logs HDFS vectorisés où :
@@ -121,82 +152,106 @@ Task_1,5,0,3,...
 Task_2,2,1,4,...
 ```
 
-## Configuration
+## Fonctionnement Technique
 
-### Paramètres du Modèle
+### Algorithme de Détection
+
+Le système utilise l'algorithme **Isolation Forest** pour la détection d'anomalies :
+
+1. **Principe** : Les anomalies sont plus faciles à isoler que les points normaux
+2. **Avantages** :
+   - Ne nécessite pas d'exemples d'anomalies pour l'apprentissage
+   - Efficace sur de grands volumes de données
+   - Robuste face aux données bruitées
+
+### Pipeline de Traitement
+
+1. **Chargement des données** : Lecture des fichiers CSV
+2. **Préprocessing** :
+   - Nettoyage et gestion des valeurs manquantes
+   - Normalisation via StandardScaler
+   - Réduction de dimensionnalité via PCA si nécessaire
+3. **Entraînement** : Création d'un modèle Isolation Forest
+4. **Détection** : Identification des points anormaux
+5. **Post-traitement** : Analyse des résultats et génération de rapports
+6. **Visualisation** : Création de graphiques pour l'interprétation
+
+### Paramètres Configurables
 
 - **contamination** : Proportion d'anomalies attendues (défaut: 0.01 = 1%)
 - **n_estimators** : Nombre d'arbres dans l'Isolation Forest (défaut: 200)
 - **max_samples** : Échantillons utilisés pour chaque arbre (défaut: 'auto')
 
-### Préprocessing
+## Visualisations
 
-- **Normalisation** : StandardScaler pour normaliser les features
-- **Réduction de dimensionnalité** : PCA si plus de 100 dimensions
-- **Échantillonnage** : Limitation à 50,000 échantillons pour l'entraînement
+Le système génère plusieurs types de visualisations pour faciliter l'analyse :
 
-## Résultats
+1. **Heatmap de catégorie/sévérité** : Répartition des anomalies par type et gravité
+2. **Histogrammes** : Distribution des scores d'anomalies
+3. **Graphiques temporels** : Évolution des anomalies dans le temps (si données temporelles)
 
-### Sortie de Détection
+### Exemple de Heatmap
+
+La heatmap de catégorie/sévérité permet de visualiser :
+- Les catégories d'anomalies (axe Y)
+- Les niveaux de gravité (axe X)
+- La fréquence de chaque combinaison (couleur)
+
+## Résultats et Interprétation
+
+### Format des Résultats
 
 Le système fournit :
 
 1. **Statistiques globales** : Nombre total d'anomalies et pourcentage
-2. **Top anomalies** : Les 5 anomalies les plus sévères avec leurs scores
+2. **Top anomalies** : Les anomalies les plus sévères avec leurs scores
 3. **Événements critiques** : Identification des événements principaux pour chaque anomalie
 4. **Fichier de résultats** : Export CSV des anomalies détectées
 
-### Exemple de Sortie
+### Interprétation des Scores
 
-```
-RÉSULTATS DE L'ANALYSE:
-  - Total analysé: 29817 séquences HDFS
-  - Anomalies trouvées: 22440
-  - Pourcentage d'anomalies: 75.26%
+- **Score proche de 0** : comportement très normal
+- **Score négatif (ex: -0.1)** : légèrement anormal
+- **Score très négatif (ex: -0.5)** : très anormal
 
-TOP 5 ANOMALIES LES PLUS SÉVÈRES:
-  1. Ligne 22623: Score = -0.211
-     Événements principaux: {'bestNode+success': 16.0, 'chooseDataNode+success': 16.0}
-```
+### Seuils Recommandés
 
-## Architecture Technique
+- **0-2% d'anomalies** : Fonctionnement normal
+- **5-15% d'anomalies** : Problème potentiel mineur
+- **>20% d'anomalies** : Problème potentiellement sérieux
 
-### Modèle de Détection
+## Bonnes Pratiques
 
-- **Algorithme** : Isolation Forest
-- **Principe** : Isolation des points anormaux par partitionnement récursif
-- **Avantages** : Efficace sur de gros volumes, pas besoin de données labellisées
+### Pour l'Entraînement
 
-### Pipeline de Traitement
+1. **Qualité des données** : Utilisez des données vraiment normales
+2. **Volume suffisant** : Idéalement 10,000+ lignes pour l'entraînement
+3. **Diversité** : Les données doivent couvrir différentes situations normales
+4. **Réentraînement régulier** : Mettez à jour le modèle périodiquement
 
-1. **Chargement** : Lecture CSV avec gestion d'encodage multiple
-2. **Validation** : Vérification de la structure des données
-3. **Préprocessing** : Nettoyage et normalisation
-4. **Entraînement/Prédiction** : Application du modèle
-5. **Post-traitement** : Analyse et sauvegarde des résultats
+### Pour l'Analyse
+
+1. **Vérification des top anomalies** : Examinez toujours les anomalies les plus sévères
+2. **Analyse contextuelle** : Interprétez les résultats dans le contexte de votre système
+3. **Suivi temporel** : Comparez les résultats dans le temps pour détecter des tendances
+4. **Ajustement des seuils** : Adaptez les paramètres selon vos besoins spécifiques
 
 ## Extensibilité
 
-### Ajouter un Nouveau Type de Détecteur
+Le système est conçu pour être facilement extensible :
 
-1. Hériter de `BaseAnomalyDetector`
-2. Implémenter les méthodes abstraites
-3. Ajouter le nouveau type dans les scripts
+1. **Nouveaux détecteurs** : Héritez de `BaseAnomalyDetector` pour créer des détecteurs spécialisés
+2. **Nouvelles visualisations** : Ajoutez des scripts dans le dossier `scripts/`
+3. **Intégration** : Le système peut être intégré dans des pipelines plus larges
 
-```python
-from src.models.base_detector import BaseAnomalyDetector
+## Limitations
 
-class MonNouveauDetector(BaseAnomalyDetector):
-    def load_data(self, file_path):
-        # Implémentation spécifique
-        pass
+- Optimisé pour les logs HDFS au format vectorisé
+- Performance dépendante de la qualité des données d'entraînement
+- Détecte les anomalies mais ne les explique pas automatiquement
+- Les très gros fichiers peuvent nécessiter un traitement par lots
 
-    def preprocess_data(self, data):
-        # Préprocessing spécialisé
-        pass
-```
-
-## Dépannage
+## Support et Dépannage
 
 ### Problèmes Courants
 
@@ -204,56 +259,23 @@ class MonNouveauDetector(BaseAnomalyDetector):
 2. **Mémoire insuffisante** : Échantillonnage automatique à 50,000 lignes
 3. **Colonnes manquantes** : Ajout automatique avec valeurs 0
 
-### Logs
+### Logs du Système
 
 Les logs sont sauvegardés dans `logs/gestionlogs.log` pour le débogage.
 
-## Performance
+## Documentation Supplémentaire
 
-### Recommandations
+- **Documentation Complète** : Un document détaillé (`documentation.md`) contenant les explications techniques approfondies et le guide utilisateur complet
+- **Scripts de Visualisation** : Des scripts Python pour générer des visualisations avancées (`scripts/visualize_anomalies.py`)
 
-- **Données d'entraînement** : 10,000 à 100,000 échantillons optimaux
-- **Mémoire** : 4GB RAM recommandés pour de gros datasets
-- **Temps d'exécution** : ~1-5 minutes selon la taille des données
+## Remarques Importantes
 
-## Contribution
+- **Fichiers CSV volumineux** : Les fichiers CSV (`normal_trace.csv`, `failure_trace.csv`, etc.) doivent être extraits du fichier zip avant utilisation car ils sont trop volumineux pour être manipulés directement dans l'archive
+- **Extraction préalable** : Assurez-vous de dézipper complètement l'archive `gestion_logs.zip` avant d'exécuter les scripts
+- **Explication Technique** : Détails sur l'algorithme Isolation Forest et son fonctionnement
 
-### Structure de Développement
+## Crédits
 
-1. **Tests** : Ajouter des tests dans le dossier `tests/`
-2. **Documentation** : Maintenir les docstrings en français
-3. **Style** : Suivre PEP 8 pour le code Python
+- **Dataset** : LogHub – HDFS v3 (https://zenodo.org/record/8196385)
+- **Algorithme** : Isolation Forest (scikit-learn)
 
-### Workflow de Développement
-
-1. Fork du projet
-2. Création d'une branche feature
-3. Développement avec tests
-4. Pull request avec description détaillée
-
-## Licence
-
-Ce projet est sous licence MIT. Voir le fichier `LICENSE` pour plus de détails.
-
-## Support
-
-Pour toute question ou problème :
-
-1. Vérifiez la documentation
-2. Consultez les logs d'erreur
-3. Ouvrez une issue sur le repository
-
-## Changelog
-
-### Version 2.0.0
-- Refactorisation complète de l'architecture
-- Séparation en modules spécialisés
-- Interface en ligne de commande améliorée
-- Documentation complète en français
-- Suppression des émojis du code
-- Amélioration du système de logging
-
-### Version 1.0.0
-- Implémentation initiale du détecteur HDFS
-- Interface interactive de base
-- Détection d'anomalies avec Isolation Forest
